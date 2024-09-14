@@ -1,15 +1,22 @@
-from pyrogram import Client
+import re
 
-async def scrape_mail_messages(user: Client, chat_id: int, limit: int):
+async def scrape_mail_messages(client, channel_username, limit, start_number=None):
     messages = []
-    async for message in user.search_messages(chat_id, limit=limit):
-        if message.text:
-            # Scrape only the email:password format, excluding other info
-            lines = message.text.split("\n")
-            for line in lines:
-                # Check if the line contains email:password format
-                if ":" in line and "@" in line:
-                    combo = line.split(" | ")[0].strip()  # Extract the email:password part
-                    if combo:
-                        messages.append(combo)
+    count = 0
+    pattern = r'[\w\.-]+@[\w\.-]+\.\w+:[^\s|]+'  # Updated to handle more complex cases
+
+    async for message in client.search_messages(channel_username):
+        if count >= limit:
+            break
+        text = message.text if message.text else message.caption
+        if text:
+            matched_messages = re.findall(pattern, text)
+            if matched_messages:
+                formatted_messages = []
+                for matched_message in matched_messages:
+                    formatted_messages.append(matched_message)
+                messages.extend(formatted_messages)
+                count += len(formatted_messages)
+    if start_number:
+        messages = [msg for msg in messages if msg.startswith(start_number)]
     return messages
