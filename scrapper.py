@@ -25,16 +25,17 @@ user = Client(
     workers=1000
 )
 
-scrape_queue = asyncio.Queue()
-
+# Remove duplicates from messages
 def remove_duplicates(messages):
     unique_messages = list(set(messages))
     duplicates_removed = len(messages) - len(unique_messages)
     return unique_messages, duplicates_removed
 
+# Function to scrape credit card details from messages
 async def scrape_messages(client, channel_username, limit, start_number=None):
     messages = []
     count = 0
+    # Regex pattern to match card details
     pattern = r'\d{16}\D*\d{2}\D*\d{2,4}\D*\d{3,4}'
     async for message in user.search_messages(channel_username):
         if count >= limit:
@@ -48,28 +49,50 @@ async def scrape_messages(client, channel_username, limit, start_number=None):
                     extracted_values = re.findall(r'\d+', matched_message)
                     if len(extracted_values) == 4:
                         card_number, mo, year, cvv = extracted_values
-                        year = year[-2:]
+                        year = year[-2:]  # Take last two digits of the year
                         formatted_messages.append(f"{card_number}|{mo}|{year}|{cvv}")
                 messages.extend(formatted_messages)
                 count += len(formatted_messages)
+    # Filter messages starting with a specific number if provided
     if start_number:
         messages = [msg for msg in messages if msg.startswith(start_number)]
     messages = messages[:limit]
     return messages
 
+# Function to scrape URLs from messages
+async def scrape_urls(client, channel_username, limit):
+    urls = []
+    count = 0
+    # Regex pattern to match URLs
+    pattern = r'(https?://[^\s]+)'
+    async for message in user.search_messages(channel_username):
+        if count >= limit:
+            break
+        text = message.text if message.text else message.caption
+        if text:
+            matched_urls = re.findall(pattern, text)
+            urls.extend(matched_urls)
+            count += len(matched_urls)
+    urls = urls[:limit]
+    return urls
+
+# Command handler for the /scr command (scraping credit cards)
 @bot.on_message(filters.command(["scr"]))
 async def scr_cmd(client, message):
     args = message.text.split()[1:]
+    # Check if the correct number of arguments is provided
     if len(args) < 2 or len(args) > 3:
         await message.reply_text("<b>⚠️ Provide channel username and amount to scrape</b>")
         return
     channel_identifier = args[0]
     limit = int(args[1])
     max_lim = ADMIN_LIMIT if message.from_user.id in ADMIN_IDS else DEFAULT_LIMIT
+    # Check if the limit exceeds the maximum allowed
     if limit > max_lim:
         await message.reply_text(f"<b>Sorry Bro! Amount over Max limit is {max_lim} ❌</b>")
         return
     start_number = args[2] if len(args) == 3 else None
+    # Parse the URL or channel username
     parsed_url = urlparse(channel_identifier)
     channel_username = parsed_url.path.lstrip('/') if not parsed_url.scheme else channel_identifier
     try:
@@ -78,13 +101,16 @@ async def scr_cmd(client, message):
     except Exception:
         await message.reply_text("<b>Hey Bro! 🥲 Incorrect username ❌</b>")
         return
+    # Inform the user that scraping is in progress
     temporary_msg = await message.reply_text("<b>Scraping in progress wait.....</b>")
     scrapped_results = await scrape_messages(user, chat.id, limit, start_number)
     unique_messages, duplicates_removed = remove_duplicates(scrapped_results)
     if unique_messages:
+        # Create a file with the scrapped data
         file_name = f"x{len(unique_messages)}_{channel_name.replace(' ', '_')}.txt"
         with open(file_name, 'w') as f:
             f.write("\n".join(unique_messages))
+        # Send the file to the user
         with open(file_name, 'rb') as f:
             caption = (
                 f"<b>CC Scrapped Successful ✅</b>\n"
@@ -97,54 +123,28 @@ async def scr_cmd(client, message):
             )
             await temporary_msg.delete()
             await client.send_document(message.chat.id, f, caption=caption)
+        # Clean up the file after sending
         os.remove(file_name)
     else:
         await temporary_msg.delete()
         await client.send_message(message.chat.id, "<b>Sorry Bro ❌ No Credit Card Found</b>")
 
-def remove_duplicates(messages):
-    unique_messages = list(set(messages))
-    duplicates_removed = len(messages) - len(unique_messages)
-    return unique_messages, duplicates_removed
-
-async def scrape_urls(client, channel_username, limit, start_number=None):
-    messages = []
-    count = 0
-    # URL pattern to match domains and URLs
-    pattern = r'(?i)\b(?:https?://|www\d{0,3}[.]|[a-z0-9.-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))\))+(?:\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’])'
-    async for message in user.search_messages(channel_username):
-        if count >= limit:
-            break
-        text = message.text if message.text else message.caption
-        if text:
-            matched_urls = re.findall(pattern, text)
-            if matched_urls:
-                formatted_urls = []
-                for matched_url in matched_urls:
-                    # Extracting domain names from the matched URLs
-                    formatted_url = re.search(r'([a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}.*)', matched_url)
-                    if formatted_url:
-                        formatted_urls.append(formatted_url.group(1))
-                messages.extend(formatted_urls)
-                count += len(formatted_urls)
-    if start_number:
-        messages = [msg for msg in messages if msg.startswith(start_number)]
-    messages = messages[:limit]
-    return messages
-
+# Command handler for the /scrurl command (scraping URLs)
 @bot.on_message(filters.command(["scrurl"]))
 async def scrurl_cmd(client, message):
     args = message.text.split()[1:]
-    if len(args) < 2 or len(args) > 3:
+    # Check if the correct number of arguments is provided
+    if len(args) < 2:
         await message.reply_text("<b>⚠️ Provide channel username and amount to scrape</b>")
         return
     channel_identifier = args[0]
     limit = int(args[1])
     max_lim = ADMIN_LIMIT if message.from_user.id in ADMIN_IDS else DEFAULT_LIMIT
+    # Check if the limit exceeds the maximum allowed
     if limit > max_lim:
         await message.reply_text(f"<b>Sorry Bro! Amount over Max limit is {max_lim} ❌</b>")
         return
-    start_number = args[2] if len(args) == 3 else None
+    # Parse the URL or channel username
     parsed_url = urlparse(channel_identifier)
     channel_username = parsed_url.path.lstrip('/') if not parsed_url.scheme else channel_identifier
     try:
@@ -153,31 +153,35 @@ async def scrurl_cmd(client, message):
     except Exception:
         await message.reply_text("<b>Hey Bro! 🥲 Incorrect username ❌</b>")
         return
+    # Inform the user that scraping is in progress
     temporary_msg = await message.reply_text("<b>Scraping in progress wait.....</b>")
-    scrapped_results = await scrape_urls(user, chat.id, limit, start_number)
-    unique_messages, duplicates_removed = remove_duplicates(scrapped_results)
-    if unique_messages:
-        file_name = f"urls_{len(unique_messages)}_{channel_name.replace(' ', '_')}.txt"
+    scrapped_urls = await scrape_urls(user, chat.id, limit)
+    unique_urls, duplicates_removed = remove_duplicates(scrapped_urls)
+    if unique_urls:
+        # Create a file with the scrapped URLs
+        file_name = f"x{len(unique_urls)}_{channel_name.replace(' ', '_')}_urls.txt"
         with open(file_name, 'w') as f:
-            f.write("\n".join(unique_messages))
+            f.write("\n".join(unique_urls))
+        # Send the file to the user
         with open(file_name, 'rb') as f:
             caption = (
-                f"<b>URLs Scrapped Successfully ✅</b>\n"
+                f"<b>URLs Scrapped Successful ✅</b>\n"
                 f"<b>━━━━━━━━━━━━━━━━</b>\n"
                 f"<b>Source:</b> <code>{channel_name}</code>\n"
-                f"<b>Amount:</b> <code>{len(unique_messages)}</code>\n"
+                f"<b>Amount:</b> <code>{len(unique_urls)}</code>\n"
                 f"<b>Duplicates Removed:</b> <code>{duplicates_removed}</code>\n"
                 f"<b>━━━━━━━━━━━━━━━━</b>\n"
-                f"<b>URL-Scrapper By: <a href='https://t.me/aftab_kabirr'>Aftab👑</a></b>\n"
+                f"<b>URL-Scrapper By: <a href='https://t.me/itsSmartDev'>Smart Dev</a></b>\n"
             )
             await temporary_msg.delete()
             await client.send_document(message.chat.id, f, caption=caption)
+        # Clean up the file after sending
         os.remove(file_name)
     else:
         await temporary_msg.delete()
         await client.send_message(message.chat.id, "<b>Sorry Bro ❌ No URLs Found</b>")
 
-
+# Start the user client and run the bot
 if __name__ == "__main__":
     user.start()
-    bot.run() 
+    bot.run()
