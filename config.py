@@ -1,14 +1,12 @@
-# Copyright (C) @TheSmartBisnu
-# Channel: https://t.me/itsSmartDev
 
 # Pyrogram setup
-API_ID = "28555426"  # Replace this API ID with your actual API ID
-API_HASH = "e8cc1e4bc5efd44bf39e6efb1bfeed39"  # Replace this API HASH with your actual API HASH
-SESSION_STRING = "BAGzuKIACe7ahFpE7U_IAtot_xKttNEurQhVNErpzeZEniWEwS0QBuE8FeLXT2ZdNcZhZ2A8nDrUv8lQi8bZS-uH6jgm29A4fqKjeCEPnht8yfZdFIi8-PxzH129ucLVTInThWXyrCG1NhMsUClhsrQi2DxUFRjOaQKN01O_HZHpo4gNimYYutqEK9oIrCvt9N1A2V5zMq5tIaIc30p0Xcud_erE9XiK_elQjheLrLFhXBKFwQjXsIYwzjiLgSYAtuMqluP2gKTfWj03GdNKEONHIPvIM0ebRfPGe7DDc9MU00v_9edZ8rtUIkpWKsTuLgHjgUi4OFc5cQyRqyn4XtOI8KdTiwAAAAGoU0GaAA"  # Replace this SESSION STRING with your actual SESSION_STRING
-BOT_TOKEN = "7289187317:AAGaQf5x7PZW_JrDRxgLo-pDWBH2zUmoym8"  # Replace this BOT_TOKEN
+API_ID = "28271744"  # Replace this API ID with your actual API ID
+API_HASH = "1df4d2b4dc77dc5fd65622f9d8f6814d"  # Replace this API HASH with your actual API HASH
+SESSION_STRING = "BQGvZIAAtYZzVJiYwAVDg11WAUTYvdWhlw5FzNu37PfXELyLusbLdV9axW4EQqt3gXzwkhJUBQ3xlPJjRwUnp74qdkFlp2lqbCPFFOW6lcSOPTYjmjGboEFoBvOS4cDJYfqXb4F3IMcEBd1DhZfILzRvutTxB2xQwehOkB10thKfvgVkUkp_Mho7gCY0wvcm1AfriHZhxCVxb03crl4zNQV1g6uYPFgj12pO-_XnZF8M0NJtrhfhvPqo9vuXROgKv9HgOr1_K3sHUd2K67pFb5xQxua2DEmGaWd3_PrdKElb5DzyKAb2U037lfz1ELFov5MWnSSmhxnEFMhpV8qm7eyB_QbySwAAAAGMkIjTAA"  # Replace this SESSION STRING with your actual SESSION_STRING
+BOT_TOKEN = "7046039219:AAGd0N4URpOBuQX_WFYCwCBrjgdVgCHIni8"  # Replace this BOT_TOKEN
 
 # Admin IDs
-ADMIN_IDS = [7118995866, 12345678]
+ADMIN_IDS = [6653249747, 5429071679]
 
 # Limits
 DEFAULT_LIMIT = 10000 # Card Scrapping Limit For Everyone
