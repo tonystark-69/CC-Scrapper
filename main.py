@@ -38,6 +38,7 @@ async def start_cmd(client, message):
         "1. <code>/scr &lt;channel&gt; &lt;limit&gt;</code> - Scrape credit card data.\n"
         "2. <code>/scrurl &lt;channel&gt; &lt;limit&gt;</code> - Scrape URLs.\n"
         "3. <code>/scrmail &lt;channel&gt; &lt;limit&gt;</code> - Scrape email:password combos.\n"
+        "4. <code>/combo</code> - Check email:password combos in a text file.\n"
         "Example: <code>/scr @channel 100</code>\n\n"
         "For any issues, contact the bot creator: <a href='https://t.me/aftab_kabirr'>Aftab👑</a>"
     )
@@ -173,6 +174,13 @@ async def scrmail_cmd(client, message):
     else:
         await temporary_msg.delete()
         await client.send_message(message.chat.id, "<b>Sorry Bro ❌ No Emails Found</b>")
+
+# /combo command to check email:password combos
+@bot.on_message(filters.command(["combo"]))
+async def combo_cmd(client, message):
+    await handle_combo(bot, message)  # Call the function from combo.py
+
+
 
 if __name__ == "__main__":
     keep_alive()  # Start the keep-alive server
