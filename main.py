@@ -6,6 +6,7 @@ from config import API_ID, API_HASH, SESSION_STRING, BOT_TOKEN, ADMIN_IDS, DEFAU
 from scr import scrape_cc_messages
 from scrurl import scrape_url_messages
 from scrmail import scrape_mail_messages
+from combo import handle_combo
 from keep_alive import keep_alive
 
 # Initialize the bot and user clients
