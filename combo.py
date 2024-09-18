@@ -1,12 +1,19 @@
 import os
 
 async def handle_combo(bot, message):
-    # Check if a document (txt file) is attached
-    if not message.document or not message.document.file_name.endswith(".txt"):
-        await message.reply_text("<b>❌ Please reply with a valid .txt file containing email:password combos</b>")
+    # Ensure the message has a document (attachment)
+    if not message.reply_to_message or not message.reply_to_message.document:
+        await message.reply_text("<b>❌ Please reply to a message with a valid .txt file containing email:password combos</b>")
         return
 
-    file_id = message.document.file_id
+    document = message.reply_to_message.document
+    
+    # Check if the file is a .txt file
+    if not document.file_name.endswith(".txt"):
+        await message.reply_text("<b>❌ Please reply with a valid .txt file containing email:password combos</b>")
+        return
+    
+    file_id = document.file_id
     
     # Download the file
     file_path = await bot.download_media(file_id)
