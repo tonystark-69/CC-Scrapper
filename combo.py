@@ -1,5 +1,5 @@
 import os
-from telegram import Update
+#from telegram import Update
 from pyrogram import Client
 import requests
 
