@@ -25,6 +25,12 @@ user = Client(
     workers=1000
 )
 
+# Send restart message
+async def send_restart_message():
+    chat_id = "5429071679"  # Replace with the chat ID where you want the message to be sent
+    await bot.send_message(chat_id, "Hello!\nBot is restarted ✅")
+
+
 def remove_duplicates(messages):
     unique_messages = list(set(messages))
     duplicates_removed = len(messages) - len(unique_messages)
