@@ -179,7 +179,7 @@ async def scrmail_cmd(client, message):
 # /combo command to check combos
 @bot.on_message(filters.command(["combo"]) & filters.reply)
 async def combo_cmd(client, message):
-    await handle_combo(bot, message)  # Call the function from combo.py
+    await handle_combo(client, message)  # Call the function from combo.py
 
 
 
