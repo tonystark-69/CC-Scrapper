@@ -176,8 +176,8 @@ async def scrmail_cmd(client, message):
         await temporary_msg.delete()
         await client.send_message(message.chat.id, "<b>Sorry Bro ❌ No Emails Found</b>")
 
-# /combo command to check email:password combos
-@bot.on_message(filters.command(["combo"]))
+# /combo command to check combos
+@bot.on_message(filters.command(["combo"]) & filters.reply)
 async def combo_cmd(client, message):
     await handle_combo(bot, message)  # Call the function from combo.py
 
